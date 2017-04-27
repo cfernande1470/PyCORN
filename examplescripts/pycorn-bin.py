@@ -196,9 +196,9 @@ def smartscale(inp):
         values_in_range = tmp_y[range_min_idx:range_max_idx]
         min_y_values.append(min(values_in_range))
         max_y_values.append(max(values_in_range))
-    plot_y_min_tmp = min(min_y_values)
+    plot_y_min_tmp = min(min_y_values) + 8
     plot_y_max_tmp = max(max_y_values)
-    plot_y_min, plot_y_max = expander(plot_y_min_tmp, plot_y_max_tmp, 0.085)
+    plot_y_min, plot_y_max = expander(plot_y_min_tmp, plot_y_max_tmp, 0.08)
     return plot_x_min, plot_x_max, plot_y_min, plot_y_max
 
 def plotterX(inp,fname):
@@ -209,7 +209,7 @@ def plotterX(inp,fname):
     host.set_xlim(plot_x_min, plot_x_max)
     host.set_ylim(plot_y_min, plot_y_max)
     for i in inp.keys():
-        if i.startswith('UV') and not i.endswith('_0nm'):
+        if i.startswith('UV1') and not i.endswith('_0nm'):
             x_dat, y_dat = xy_data(inp[i]['data'])
             print("Plotting: " + inp[i]['data_name'])
             stl = styles[i[:4]]
@@ -225,7 +225,7 @@ def plotterX(inp,fname):
             stl = styles[par1_inp[:4]]
             par1.set_ylabel(par1_data['data_name'] + " (" + par1_data['unit'] + ")", color=stl['color'])
             x_dat_p1, y_dat_p1 = xy_data(par1_data['data'])
-            p1_ymin, p1_ymax = expander(min(y_dat_p1), max(y_dat_p1), 0.085)
+            p1_ymin, p1_ymax = expander(min(y_dat_p1), max(y_dat_p1), 1)
             par1.set_ylim(p1_ymin, p1_ymax)
             print("Plotting: " + par1_data['data_name'])
             p1, = par1.plot(x_dat_p1, y_dat_p1, label=par1_data['data_name'], 
@@ -262,16 +262,18 @@ def plotterX(inp,fname):
             frac_delta = [abs(a - b) for a, b in zip(frac_x, frac_x[1:])]
             frac_delta.append(frac_delta[-1])
             frac_y_pos = mapper(host.get_ylim()[0], host.get_ylim()[1], 0.015)
-            for i in frac_data:
-                host.axvline(x=i[0], ymin=0.065, ymax=0.0, color='r', linewidth=0.85)
+            for i in frac_data[:-2]:
                 host.annotate(str(i[1]), xy=(i[0] + frac_delta[frac_data.index(i)] * 0.55, frac_y_pos),
-                         horizontalalignment='center', verticalalignment='bottom', size=8, rotation=90)
+                        horizontalalignment='center', verticalalignment='bottom', size=8, rotation=90)
+            for i in frac_data[:-1]:            
+                host.axvline(x=i[0], ymin=0.065, ymax=0.0, color='r', linewidth=0.85)
+                          
         except:
             KeyError
-    if inp.inject_vol != 0.0:
-        injections = inp.injection_points
-        host.axvline(x=0, ymin=0.10, ymax=0.0, color='#FF3292',
-                     ls ='-', marker='v', markevery=2, linewidth=1.5, alpha=0.85, label='Inject')
+#    if inp.inject_vol != 0.0:
+#        injections = inp.injection_points
+#        host.axvline(x=0, ymin=0.10, ymax=0.0, color='#FF3292',
+#                     ls ='-', marker='v', markevery=2, linewidth=1.5, alpha=0.85, label='Inject')
     host.set_xlim(plot_x_min, plot_x_max)
     if not args.no_legend:
         host.legend(fontsize=8, fancybox=True, labelspacing=0.4, loc='upper right', numpoints=1)
